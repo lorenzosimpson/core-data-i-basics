@@ -20,7 +20,6 @@ class TaskTableViewCell: UITableViewCell {
     
     // MARK: - IBOutlets
     @IBOutlet weak var taskNameLabel: UILabel!
-    
     @IBOutlet weak var completedButton: UIButton!
     
     // MARK: - Actions
@@ -29,13 +28,14 @@ class TaskTableViewCell: UITableViewCell {
         task.complete.toggle()
         completedButton.setImage((task.complete) ? UIImage(systemName: "checkmark.square.fill")
                                     : UIImage(systemName:  "square"), for: .normal)
-        
         do {
             try CoreDataStack.shared.mainContext.save()
         } catch {
+            CoreDataStack.shared.mainContext.reset()
             NSLog("error saving managed object context, \(error)")
         }
     }
+    
     
     private func updateViews() {
         guard let task = task else { return }
@@ -43,4 +43,6 @@ class TaskTableViewCell: UITableViewCell {
         completedButton.setImage((task.complete) ? UIImage(systemName: "checkmark.square.fill")
                                     : UIImage(systemName:  "square"), for: .normal)
     }
+    
+    
 }

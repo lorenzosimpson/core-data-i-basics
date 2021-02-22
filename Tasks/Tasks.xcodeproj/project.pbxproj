@@ -34,6 +34,7 @@
 		ED09F5B025DEDB51007A1FA8 /* CoreDataStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataStack.swift; sourceTree = SOURCE_ROOT; };
 		ED09F5B325DEDD76007A1FA8 /* Task+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Task+Convenience.swift"; sourceTree = "<group>"; };
 		ED5CA8EA25DED6E3004B81EF /* Tasks.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Tasks.xcdatamodel; sourceTree = "<group>"; };
+		EDC100E625E4130F00747E06 /* Tasks 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Tasks 2.xcdatamodel"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -393,9 +394,10 @@
 		ED5CA8E925DED6E3004B81EF /* Tasks.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				EDC100E625E4130F00747E06 /* Tasks 2.xcdatamodel */,
 				ED5CA8EA25DED6E3004B81EF /* Tasks.xcdatamodel */,
 			);
-			currentVersion = ED5CA8EA25DED6E3004B81EF /* Tasks.xcdatamodel */;
+			currentVersion = EDC100E625E4130F00747E06 /* Tasks 2.xcdatamodel */;
 			path = Tasks.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

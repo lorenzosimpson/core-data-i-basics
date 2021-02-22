@@ -18,7 +18,7 @@ class CreateTaskViewController: UIViewController {
     
     // MARK: - View Lifecycle
     @IBOutlet weak var nameTextField: UITextField!
-    
+    @IBOutlet weak var prioritySegmentedControl: UISegmentedControl!
     @IBOutlet weak var notesTextView: UITextView!
     
     // MARK: - Actions
@@ -32,9 +32,12 @@ class CreateTaskViewController: UIViewController {
         guard let name = nameTextField.text,
               !name.isEmpty else { return }
         let notes = notesTextView.text
+        let priorityIndex = prioritySegmentedControl.selectedSegmentIndex
+        // map to enum value
+        let priority = TaskPriority.allCases[priorityIndex]
         
         // The task exists on the moc, so no reference is needed
-        Task(complete: complete, notes: notes, name: name)
+        Task(complete: complete, notes: notes, name: name, priority: priority)
         // save to object context
         do {
             try CoreDataStack.shared.mainContext.save()

@@ -5,8 +5,9 @@
         <attribute name="identifier" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="name" attributeType="String"/>
         <attribute name="notes" optional="YES" attributeType="String"/>
+        <attribute name="priority" attributeType="String" defaultValueString="normal"/>
     </entity>
     <elements>
-        <element name="Task" positionX="-63" positionY="-18" width="128" height="89"/>
+        <element name="Task" positionX="-63" positionY="-18" width="128" height="104"/>
     </elements>
 </model>
