@@ -17,6 +17,19 @@ enum TaskPriority: String, CaseIterable {
 }
 
 extension Task {
+    // Enable a task to be able to convert itself into a TaskRepresentation object
+    var taskRepresentation: TaskRepresentation? {
+        guard let id = identifier, let name = name,
+              let priority = priority else { return nil }
+        
+        return TaskRepresentation(identifier: id.uuidString,
+                                  name: name,
+                                  notes: notes,
+                                  priority: priority,
+                                  complete: complete)
+    }
+    
+    
     @discardableResult convenience init(identifier: UUID=UUID(),
                                         complete: Bool = false,
                                         notes: String?,

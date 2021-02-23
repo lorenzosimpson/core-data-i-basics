@@ -26,8 +26,8 @@ class TaskTableViewCell: UITableViewCell {
     @IBAction func toggleComplete(_ sender: UIButton) {
         guard let task = task else { return }
         task.complete.toggle()
-        completedButton.setImage((task.complete) ? UIImage(systemName: "checkmark.square.fill")
-                                    : UIImage(systemName:  "square"), for: .normal)
+        completedButton.setImage((task.complete) ? UIImage(systemName: "checkmark.circle.fill")
+                                    : UIImage(systemName: "circle"), for: .normal)
         do {
             try CoreDataStack.shared.mainContext.save()
         } catch {
@@ -41,7 +41,7 @@ class TaskTableViewCell: UITableViewCell {
         guard let task = task else { return }
         taskNameLabel.text = task.name
         completedButton.setImage((task.complete) ? UIImage(systemName: "checkmark.square.fill")
-                                    : UIImage(systemName:  "square"), for: .normal)
+                                    : UIImage(systemName: "circle"), for: .normal)
     }
     
     

@@ -13,6 +13,8 @@ class TasksTableViewController: UITableViewController {
 
     // MARK: - Properties
     
+    let taskController = TaskController()
+    
     lazy var fetchedResultsController: NSFetchedResultsController<Task> = {
         let fetchRequest: NSFetchRequest<Task> = Task.fetchRequest()
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "priority", ascending: true),
@@ -65,16 +67,24 @@ class TasksTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             let task = fetchedResultsController.object(at: indexPath)
-            let moc = CoreDataStack.shared.mainContext
-            moc.delete(task)
-            
-            do {
-                try moc.save()
-                tableView.reloadData()
-            } catch {
-                moc.reset()
-                NSLog("error saving managed object context, \(error)")
+            taskController.deleteTaskFromServer(task: task) { (result) in
+                // throwable method as optional. does result.get() produce a value? or nil
+                // don't care about the value, not storing it
+                
+                
+                guard let _ = try? result.get() else { return }
+                // if Firebase deletion works, continue and delete it locally.
+                
+                CoreDataStack.shared.mainContext.delete(task)
+                
+                do {
+                    try CoreDataStack.shared.mainContext.save()
+                } catch {
+                    CoreDataStack.shared.mainContext.reset()
+                    NSLog("error saving managed object context, \(error)")
+                }
             }
+           
         }
     }
 
@@ -82,9 +92,19 @@ class TasksTableViewController: UITableViewController {
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+        if segue.identifier == "ShowDetailSegue" {
+            if let detailVC = segue.destination as? TaskDetailViewController {
+                guard let indexPath = tableView.indexPathForSelectedRow else { return }
+                detailVC.task = fetchedResultsController.object(at: indexPath)
+            }
+        } else if segue.identifier == "CreateTaskModalSegue" {
+            // going to nav controller, NOT create
+            if let navC = segue.destination as? UINavigationController, let createTaskVC = navC.viewControllers.first as? CreateTaskViewController {
+                createTaskVC.taskController = taskController
+            }
+        }
     }
+        
 }
 
 extension TasksTableViewController: NSFetchedResultsControllerDelegate {
