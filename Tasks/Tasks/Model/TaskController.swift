@@ -23,6 +23,10 @@ let baseURL = URL(string: "https://tasks-3f211.firebaseio.com/")!
 class TaskController {
     typealias CompletionHandler = (Result<Bool, NetworkError>) -> Void
     
+    init() {
+        fetchTasksFromServer()
+    }
+    
     func sendTaskToServer(task: Task, completion: @escaping CompletionHandler = {_ in }) {
         guard let uuid = task.identifier else {
             completion(.failure(.noIdentifier))
@@ -78,5 +82,68 @@ class TaskController {
             }
             completion(.success(true))
         }.resume()
+    }
+    
+    func fetchTasksFromServer(completion: @escaping CompletionHandler = {_ in }) {
+        let requestURL = baseURL.appendingPathExtension("json")
+        
+        URLSession.shared.dataTask(with: requestURL) { (data, _, error) in
+            if let error = error {
+                NSLog("error fetching tasks, \(error)")
+                completion(.failure(.otherError))
+                return
+            }
+            guard let data = data else {
+                NSLog("no data returned from firebase (fetching tasks)")
+                completion(.failure(.noDecode))
+                return
+            }
+            do {
+                let taskRepresentations = Array(try JSONDecoder().decode([String : TaskRepresentation].self, from: data).values)
+                try self.updateTasks(with: taskRepresentations)
+            } catch {
+                NSLog("error decoding data from firebase, \(error)")
+                completion(.failure(.noDecode))
+            }
+        
+        }
+        .resume()
+    }
+    
+    private func updateTasks(with representations: [TaskRepresentation]) throws {
+        // map out just the IDs
+        let identifiersToFetch = representations.compactMap( {UUID(uuidString: $0.identifier) })
+        let representationsByID = Dictionary(uniqueKeysWithValues: zip(identifiersToFetch, representations))
+        var tasksToCreate = representationsByID
+        
+        let fetchRequest: NSFetchRequest<Task> = Task.fetchRequest()
+        // see if DB already has the tasks fetched from firebase
+        fetchRequest.predicate = NSPredicate(format: "identifier IN %@", identifiersToFetch)
+        
+        let context = CoreDataStack.shared.mainContext
+      
+        let existingTasks = try context.fetch(fetchRequest)
+        for task in existingTasks {
+            guard let id = task.identifier,
+                  let representation = representationsByID[id] else { continue }
+            self.update(with: task, representation: representation)
+            tasksToCreate.removeValue(forKey: id)
+        }
+        // tasksToCreate should now contain firebase tasks that we dont have in core data
+        for representation in tasksToCreate.values {
+            // will create managed objects
+            Task(taskRepresentation: representation, context: context)
+        }
+        try context.save()
+      
+    }
+    
+    
+    
+    private func update(with task: Task, representation: TaskRepresentation) {
+        task.name = representation.name
+        task.notes = representation.notes
+        task.priority = representation.priority
+        task.complete = representation.complete
     }
 }

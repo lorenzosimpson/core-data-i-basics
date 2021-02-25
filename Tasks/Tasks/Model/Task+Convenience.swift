@@ -32,7 +32,7 @@ extension Task {
     
     @discardableResult convenience init(identifier: UUID=UUID(),
                                         complete: Bool = false,
-                                        notes: String?,
+                                        notes: String? = nil,
                                         name: String,
                                         priority: TaskPriority = .normal,
                                         context: NSManagedObjectContext = CoreDataStack.shared.mainContext) {
@@ -42,5 +42,13 @@ extension Task {
         self.notes = notes
         self.complete = complete
         self.priority = priority.rawValue
+    }
+    
+    
+    @discardableResult convenience init?(taskRepresentation: TaskRepresentation, context: NSManagedObjectContext=CoreDataStack.shared.mainContext) {
+        guard let identifier = UUID(uuidString: taskRepresentation.identifier),
+              let priority = TaskPriority(rawValue: taskRepresentation.priority) else { return nil }
+        
+        self.init(identifier: identifier, complete: taskRepresentation.complete, notes: taskRepresentation.notes, name: taskRepresentation.name, priority: priority, context: context)
     }
 }
