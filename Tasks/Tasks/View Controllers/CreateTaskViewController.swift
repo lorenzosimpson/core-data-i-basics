@@ -13,12 +13,13 @@ class CreateTaskViewController: UIViewController {
 
     // MARK: - Properties
     var complete: Bool = false
+    var taskController: TaskController?
     
     // MARK: - IBOutlets
     
     // MARK: - View Lifecycle
     @IBOutlet weak var nameTextField: UITextField!
-    
+    @IBOutlet weak var prioritySegmentedControl: UISegmentedControl!
     @IBOutlet weak var notesTextView: UITextView!
     
     // MARK: - Actions
@@ -32,9 +33,13 @@ class CreateTaskViewController: UIViewController {
         guard let name = nameTextField.text,
               !name.isEmpty else { return }
         let notes = notesTextView.text
+        let priorityIndex = prioritySegmentedControl.selectedSegmentIndex
+        // map to enum value
+        let priority = TaskPriority.allCases[priorityIndex]
+        let task =  Task(complete: complete, notes: notes, name: name, priority: priority)
         
-        // The task exists on the moc, so no reference is needed
-        Task(complete: complete, notes: notes, name: name)
+        taskController?.sendTaskToServer(task: task)
+        
         // save to object context
         do {
             try CoreDataStack.shared.mainContext.save()
@@ -46,8 +51,8 @@ class CreateTaskViewController: UIViewController {
     
     @IBAction func toggleComplete(_ sender: UIButton) {
         complete.toggle()
-        sender.setImage(complete ? UIImage(systemName: "checkmark.square.fill") :
-                            UIImage(systemName: " square"),
+        sender.setImage(complete ? UIImage(systemName: "checkmark.circle.fill") :
+                            UIImage(systemName: "circle"),
                         for: .normal)
     }
     override func viewDidLoad() {
