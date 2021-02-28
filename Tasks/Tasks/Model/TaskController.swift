@@ -120,21 +120,33 @@ class TaskController {
         // see if DB already has the tasks fetched from firebase
         fetchRequest.predicate = NSPredicate(format: "identifier IN %@", identifiersToFetch)
         
-        let context = CoreDataStack.shared.mainContext
+        let context = CoreDataStack.shared.container.newBackgroundContext()
+        
+        var error: Error?
+        context.performAndWait {
+            do {
+                let existingTasks = try context.fetch(fetchRequest)
+                for task in existingTasks {
+                    guard let id = task.identifier,
+                          let representation = representationsByID[id] else { continue }
+                    self.update(with: task, representation: representation)
+                    tasksToCreate.removeValue(forKey: id)
+                }
+            } catch let fetchError {
+                error = fetchError
+            }
+            
+            // tasksToCreate should now contain firebase tasks that we dont have in core data
+            for representation in tasksToCreate.values {
+                // will create managed objects
+                Task(taskRepresentation: representation, context: context)
+            }
+        }
+        
+        if let error = error { throw error } // if the error is actually set
       
-        let existingTasks = try context.fetch(fetchRequest)
-        for task in existingTasks {
-            guard let id = task.identifier,
-                  let representation = representationsByID[id] else { continue }
-            self.update(with: task, representation: representation)
-            tasksToCreate.removeValue(forKey: id)
-        }
-        // tasksToCreate should now contain firebase tasks that we dont have in core data
-        for representation in tasksToCreate.values {
-            // will create managed objects
-            Task(taskRepresentation: representation, context: context)
-        }
-        try context.save()
+        try CoreDataStack.shared.save(context: context)
+        
       
     }
     
@@ -145,5 +157,6 @@ class TaskController {
         task.notes = representation.notes
         task.priority = representation.priority
         task.complete = representation.complete
+        print("update called")
     }
 }

@@ -11,6 +11,7 @@ import UIKit
 class TaskDetailViewController: UIViewController {
     
     var task: Task?
+    var taskController: TaskController?
     var wasEdited = false
 
     override func viewDidLoad() {
@@ -32,9 +33,10 @@ class TaskDetailViewController: UIViewController {
             
             let priorityIndex = priorityControl.selectedSegmentIndex
             task.priority = TaskPriority.allCases[priorityIndex].rawValue
+            taskController?.sendTaskToServer(task: task)
             
             do {
-                try CoreDataStack.shared.mainContext.save()
+                try CoreDataStack.shared.save()
             } catch {
                 NSLog("error saving changes to context, \(error)")
             }

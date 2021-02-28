@@ -70,17 +70,18 @@ class TasksTableViewController: UITableViewController {
                 
                 guard let _ = try? result.get() else { return }
                 // if Firebase deletion works, continue and delete it locally.
-                
-                CoreDataStack.shared.mainContext.delete(task)
-                
-                do {
-                    try CoreDataStack.shared.mainContext.save()
-                } catch {
-                    CoreDataStack.shared.mainContext.reset()
-                    NSLog("error saving managed object context, \(error)")
+                DispatchQueue.main.async {
+                    let context = CoreDataStack.shared.mainContext
+                    context.delete(task)
+                    
+                    do {
+                        try context.save()
+                    } catch {
+                        context.reset()
+                        NSLog("error saving managed object context, \(error)")
+                    }
                 }
             }
-           
         }
     }
 
@@ -92,6 +93,7 @@ class TasksTableViewController: UITableViewController {
             if let detailVC = segue.destination as? TaskDetailViewController {
                 guard let indexPath = tableView.indexPathForSelectedRow else { return }
                 detailVC.task = fetchedResultsController.object(at: indexPath)
+                detailVC.taskController = taskController
             }
         } else if segue.identifier == "CreateTaskModalSegue" {
             // going to nav controller, NOT create

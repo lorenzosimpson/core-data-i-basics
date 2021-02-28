@@ -40,7 +40,7 @@ class TaskTableViewCell: UITableViewCell {
     private func updateViews() {
         guard let task = task else { return }
         taskNameLabel.text = task.name
-        completedButton.setImage((task.complete) ? UIImage(systemName: "checkmark.square.fill")
+        completedButton.setImage((task.complete) ? UIImage(systemName: "checkmark.circle.fill")
                                     : UIImage(systemName: "circle"), for: .normal)
     }
     
